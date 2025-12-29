@@ -5,6 +5,7 @@ import AddTransaction from "./pages/AddTransaction";
 import EditTransaction from "./pages/EditTransaction";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import NotFound from "./pages/NotFound";
 
 function Navigation() {
   const location = useLocation();
@@ -12,16 +13,42 @@ function Navigation() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
+    const checkUser = () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch (err) {
+          console.error("Error parsing user data:", err);
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    // Check on mount
+    checkUser();
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener("storage", checkUser);
+
+    // Listen for custom event when user logs in/out in same tab
+    window.addEventListener("userChanged", checkUser);
+
+    return () => {
+      window.removeEventListener("storage", checkUser);
+      window.removeEventListener("userChanged", checkUser);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    // Dispatch event to update navigation
+    window.dispatchEvent(new Event("userChanged"));
     navigate("/login");
   };
 
@@ -81,6 +108,7 @@ function App() {
           <Route path="/:id/edit" element={<EditTransaction />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>

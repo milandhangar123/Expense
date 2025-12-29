@@ -12,9 +12,31 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-// Restrict CORS to the frontend origin (adjust or remove during testing)
+// CORS configuration - supports both local and deployed frontend
+const allowedOrigins = [
+  process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://expense-eo6k.onrender.com",
+  // Add your deployed frontend URL here when you deploy
+];
+
 const corsOptions = {
-  origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests) only in development
+    if (!origin) {
+      if (process.env.NODE_ENV === "production") {
+        return callback(new Error("Not allowed by CORS"));
+      }
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 };
 app.use(cors(corsOptions));

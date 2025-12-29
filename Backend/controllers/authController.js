@@ -6,18 +6,29 @@ const generateToken = (id) => {
 };
 
 export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body; // changed from username -> name
+  const { name, email, password } = req.body;
 
   // basic validation
   if (!name || !email || !password) {
     return res.status(400).json({ message: "Name, email and password are required" });
   }
 
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: "Please provide a valid email address" });
+  }
+
+  // Password validation
+  if (password.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters long" });
+  }
+
   try {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: "User already exists" });
 
-    const user = await User.create({ name, email, password }); // save name
+    const user = await User.create({ name, email, password });
     res.status(201).json({
       _id: user._id,
       name: user.name,
@@ -25,6 +36,10 @@ export const registerUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (err) {
+    console.error("Registration error:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "User already exists" });
+    }
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -37,10 +52,15 @@ export const loginUser = async (req, res) => {
     return res.status(400).json({ message: "Email and password are required" });
   }
 
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: "Please provide a valid email address" });
+  }
+
   try {
     const user = await User.findOne({ email });
-    if (user && (await user.matchPassword(password))){
-      // return 'name' (not username) to match registration / model
+    if (user && (await user.matchPassword(password))) {
       res.json({
         _id: user._id,
         name: user.name,
@@ -51,6 +71,7 @@ export const loginUser = async (req, res) => {
       res.status(401).json({ message: "Invalid credentials" });
     }
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Server Error" });
   }
 };

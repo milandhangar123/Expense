@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
@@ -7,6 +7,14 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,6 +59,8 @@ function Login() {
           name: data.name, 
           email: data.email 
         }));
+        // Dispatch event to update navigation
+        window.dispatchEvent(new Event("userChanged"));
         navigate("/");
       } else {
         setError("Login failed: no token received");

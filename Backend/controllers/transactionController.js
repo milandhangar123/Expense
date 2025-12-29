@@ -20,12 +20,16 @@ export const getTransactions = async (req, res) => {
 
 export const getAllTransactions = async (req, res) => {
   try {
-    // scope to authenticated user
-    const userId = req.user ? req.user.id : null;
-    const query = userId ? { user: userId } : {};
-    const transactions = await Transaction.find(query).sort({ date: -1 });
+    // Ensure user is authenticated
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    // Scope to authenticated user
+    const transactions = await Transaction.find({ user: req.user.id }).sort({ date: -1 });
     res.json(transactions);
   } catch (error) {
+    console.error("Get all transactions error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -48,16 +52,22 @@ export const addTransaction = async (req, res) => {
   }
 
   try {
+    // Ensure user is authenticated (should be guaranteed by protect middleware, but double-check)
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
     const newTransaction = new Transaction({
       title,
       amount: numAmount,
       date: parsedDate,
       category,
-      user: req.user ? req.user.id : undefined,
+      user: req.user.id,
     });
     const savedTransaction = await newTransaction.save();
     res.status(201).json(savedTransaction);
   } catch (error) {
+    console.error("Add transaction error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -89,6 +99,7 @@ export const updateTransaction = async (req, res) => {
     const updatedTransaction = await transaction.save();
     res.json(updatedTransaction);
   } catch (error) {
+    console.error("Update transaction error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -109,6 +120,7 @@ export const deleteTransaction = async (req, res) => {
     await Transaction.findByIdAndDelete(req.params.id);
     res.json({ message: "Transaction deleted" });
   } catch (error) {
+    console.error("Delete transaction error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
