@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/api";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -32,21 +33,35 @@ function Login() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const apiUrl = API_ENDPOINTS.AUTH.LOGIN;
+      const res = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (parseError) {
+        console.error("Failed to parse response:", parseError);
+        setError(`Server error: ${res.status} ${res.statusText}`);
+        setLoading(false);
+        return;
+      }
 
       if (!res.ok) {
         if (res.status === 401) {
           setError(data.message || "Invalid email or password");
         } else if (res.status === 400) {
           setError(data.message || "Please check your input");
+        } else if (res.status === 500) {
+          setError(data.message || "Server error. Please try again later.");
+        } else if (res.status === 0 || res.status === 404) {
+          setError("Cannot connect to server. Please check if the backend is running.");
         } else {
-          setError(data.message || "Login failed. Please try again.");
+          setError(data.message || `Login failed (${res.status}). Please try again.`);
         }
         setLoading(false);
         return;
@@ -66,8 +81,12 @@ function Login() {
         setError("Login failed: no token received");
       }
     } catch (err) {
-      console.error(err);
-      setError("Network error. Please check your connection.");
+      console.error("Login error:", err);
+      if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+        setError("Cannot connect to server. Please check if the backend is running at https://expense-eo6k.onrender.com");
+      } else {
+        setError(`Network error: ${err.message}. Please check your connection.`);
+      }
     } finally {
       setLoading(false);
     }

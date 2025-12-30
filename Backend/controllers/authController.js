@@ -59,8 +59,14 @@ export const loginUser = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
-    if (user && (await user.matchPassword(password))) {
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isPasswordValid = await user.matchPassword(password);
+    if (isPasswordValid) {
       res.json({
         _id: user._id,
         name: user.name,
@@ -68,10 +74,10 @@ export const loginUser = async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
-      res.status(401).json({ message: "Invalid credentials" });
+      res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: "Server Error", error: process.env.NODE_ENV === "development" ? err.message : undefined });
   }
 };

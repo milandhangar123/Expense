@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function Home() {
   const [transactions, setTransactions] = useState([]);
@@ -17,10 +18,11 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch("/api/transactions", {
+      const res = await fetch(API_ENDPOINTS.TRANSACTIONS.BASE, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
       });
 
       if (res.status === 401) {
@@ -60,7 +62,7 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch(`/api/transactions/${id}`, {
+      const res = await fetch(API_ENDPOINTS.TRANSACTIONS.BY_ID(id), {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

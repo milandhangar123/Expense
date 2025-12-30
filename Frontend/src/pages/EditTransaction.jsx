@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TransactionForm from "../components/TransactionForm";
+import { API_ENDPOINTS } from "../config/api";
 
 function EditTransaction() {
   const { id } = useParams();
@@ -19,8 +20,9 @@ function EditTransaction() {
       }
 
       try {
-        const res = await fetch(`/api/transactions/${id}`, {
+        const res = await fetch(API_ENDPOINTS.TRANSACTIONS.BY_ID(id), {
           headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         });
 
         if (res.status === 401) {
@@ -66,12 +68,13 @@ function EditTransaction() {
         return;
       }
 
-      const res = await fetch(`/api/transactions/${id}`, {
+      const res = await fetch(API_ENDPOINTS.TRANSACTIONS.BY_ID(id), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify(updatedTransaction),
       });
 

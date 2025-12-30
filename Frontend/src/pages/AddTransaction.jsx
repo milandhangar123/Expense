@@ -1,5 +1,6 @@
 import { useState } from "react";
 import TransactionForm from "../components/TransactionForm";
+import { API_ENDPOINTS } from "../config/api";
 import { useNavigate } from "react-router-dom";
 
 function AddTransaction() {
@@ -18,12 +19,13 @@ function AddTransaction() {
         return;
       }
 
-      const res = await fetch("/api/transactions", {
+      const res = await fetch(API_ENDPOINTS.TRANSACTIONS.BASE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify(transaction),
       });
 

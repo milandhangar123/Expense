@@ -13,13 +13,14 @@ const app = express();
 app.use(express.json());
 
 // CORS configuration - supports both local and deployed frontend
-const allowedOrigins = [
-  process.env.CLIENT_ORIGIN || "http://localhost:5173",
+const clientOrigins = (process.env.CLIENT_ORIGIN || "").split(",").map((s) => s.trim()).filter(Boolean);
+const defaultOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
+  // backend/public domain (if you test direct browser requests)
   "https://expense-eo6k.onrender.com",
-  // Add your deployed frontend URL here when you deploy
 ];
+const allowedOrigins = Array.from(new Set([...clientOrigins, ...defaultOrigins]));
 
 const corsOptions = {
   origin: function (origin, callback) {
