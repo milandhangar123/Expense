@@ -18,7 +18,7 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch(API_ENDPOINTS.TRANSACTIONS.BASE, {
+        const res = await fetch(API_ENDPOINTS.TRANSACTIONS.BASE, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,7 +40,7 @@ export default function Home() {
       const data = await res.json();
       setTransactions(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("Fetch transactions error:", err, "request:", API_ENDPOINTS.TRANSACTIONS.BASE);
       setTransactions([]);
     } finally {
       setLoading(false);

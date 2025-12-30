@@ -46,8 +46,9 @@ function EditTransaction() {
         const data = await res.json();
         setTransaction(data);
       } catch (err) {
-        console.error(err);
-        setError("Network error. Please try again.");
+          console.error("EditTransaction load error:", err, "request:", API_ENDPOINTS.TRANSACTIONS.BY_ID(id));
+          const msg = err?.message || String(err);
+          setError(`Network error: ${msg} (request: ${API_ENDPOINTS.TRANSACTIONS.BY_ID(id)})`);
       } finally {
         setLoading(false);
       }
@@ -93,8 +94,9 @@ function EditTransaction() {
 
       navigate("/");
     } catch (err) {
-      console.error(err);
-      setError("Network error. Please try again.");
+      console.error("EditTransaction update error:", err, "request:", API_ENDPOINTS.TRANSACTIONS.BY_ID(id));
+      const msg = err?.message || String(err);
+      setError(`Network error: ${msg} (request: ${API_ENDPOINTS.TRANSACTIONS.BY_ID(id)})`);
       setLoading(false);
     }
   };

@@ -44,8 +44,9 @@ function AddTransaction() {
 
       navigate("/");
     } catch (err) {
-      console.error(err);
-      setError("Network error. Please try again.");
+      console.error("AddTransaction fetch error:", err, "request:", API_ENDPOINTS.TRANSACTIONS.BASE);
+      const msg = err?.message || String(err);
+      setError(`Network error: ${msg} (request: ${API_ENDPOINTS.TRANSACTIONS.BASE})`);
       setLoading(false);
     }
   };

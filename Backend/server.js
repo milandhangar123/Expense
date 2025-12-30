@@ -31,11 +31,22 @@ const corsOptions = {
       }
       return callback(null, true);
     }
-    
+    // Debug logging: show incoming origin and allowed list to help diagnose Render/Vercel issues
+    try {
+      console.log("CORS check - incoming origin:", origin);
+      console.log("CORS allowed origins:", allowedOrigins);
+      console.log("CORS CLIENT_ORIGIN env:", process.env.CLIENT_ORIGIN);
+    } catch (logErr) {
+      // ignore logging errors
+    }
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      // return an informative error so Render logs show why requests are blocked
+      const err = new Error(`Not allowed by CORS - origin ${origin} not in allowed origins`);
+      console.error(err.message);
+      callback(err);
     }
   },
   credentials: true,

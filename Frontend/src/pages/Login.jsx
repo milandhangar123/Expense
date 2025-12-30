@@ -81,11 +81,12 @@ function Login() {
         setError("Login failed: no token received");
       }
     } catch (err) {
-      console.error("Login error:", err);
-      if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
-        setError("Cannot connect to server. Please check if the backend is running at https://expense-eo6k.onrender.com");
+      console.error("Login fetch error:", err, "request:", apiUrl);
+      const msg = err?.message || String(err);
+      if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+        setError(`Cannot connect to server (request: ${apiUrl}). ${msg}`);
       } else {
-        setError(`Network error: ${err.message}. Please check your connection.`);
+        setError(`Network error: ${msg} (request: ${apiUrl})`);
       }
     } finally {
       setLoading(false);
