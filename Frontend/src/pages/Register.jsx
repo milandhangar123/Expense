@@ -85,8 +85,10 @@ function Register() {
         setError("Registration failed: no token received");
       }
     } catch (err) {
-      console.error(err);
-      setError("Network error. Please check your connection.");
+      console.error("Register fetch error:", err);
+      // Show a more specific message when possible to aid debugging
+      const msg = err?.message || String(err) || "Network error. Please check your connection.";
+      setError(msg);
     } finally {
       setLoading(false);
     }

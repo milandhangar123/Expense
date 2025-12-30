@@ -1,5 +1,7 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://expense-eo6k.onrender.com';
+// Prefer explicit VITE_API_URL. When running in Vite dev mode default to localhost backend,
+// otherwise use the deployed Render URL.
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://expense-eo6k.onrender.com');
 
 export const API_ENDPOINTS = {
   AUTH: {
